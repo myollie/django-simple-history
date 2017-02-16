@@ -152,7 +152,10 @@ class HistoricalRecords(object):
             if isinstance(field, models.ForeignKey):
                 old_field = field
                 field_arguments = {'db_constraint': False}
-                if (getattr(old_field, 'one_to_one', False) or
+                to = old_field.rel.to
+                if to == 'self':
+                    to = model
+                elif (getattr(old_field, 'one_to_one', False) or
                         isinstance(old_field, models.OneToOneField)):
                     FieldType = models.ForeignKey
                 else:
@@ -162,7 +165,7 @@ class HistoricalRecords(object):
                 if getattr(old_field, 'db_column', None):
                     field_arguments['db_column'] = old_field.db_column
                 field = FieldType(
-                    old_field.rel.to,
+                    to,
                     related_name='+',
                     null=True,
                     blank=True,
